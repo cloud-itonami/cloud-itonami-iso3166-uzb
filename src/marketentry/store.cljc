@@ -19,10 +19,9 @@
   `:status` value).
 
   The ledger stays append-only on every backend."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [marketentry.registry :as registry]
-            [langchain.db :as d]))
+  (:require [marketentry.registry :as registry]
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (engagement [s id])
@@ -184,9 +183,6 @@
    :draft-sequence/jurisdiction     {:db/unique :db.unique/identity}
    :submit-sequence/jurisdiction    {:db/unique :db.unique/identity}})
 
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
-
 (defn- engagement->tx [{:keys [id operator procurement-channel base-fee monthly-rate monitoring-months claimed-fee
                                engages-local-staff-under-probation? probation-employee-category probation-period-months
                                requires-stir? stir-verified?
@@ -200,7 +196,7 @@
     monitoring-months                                 (assoc :engagement/monitoring-months monitoring-months)
     claimed-fee                                       (assoc :engagement/claimed-fee claimed-fee)
     (some? engages-local-staff-under-probation?)      (assoc :engagement/engages-local-staff-under-probation? engages-local-staff-under-probation?)
-    probation-employee-category                       (assoc :engagement/probation-employee-category (enc probation-employee-category))
+    probation-employee-category                       (assoc :engagement/probation-employee-category (ls/enc probation-employee-category))
     probation-period-months                           (assoc :engagement/probation-period-months probation-period-months)
     (some? requires-stir?)                            (assoc :engagement/requires-stir? requires-stir?)
     (some? stir-verified?)                            (assoc :engagement/stir-verified? stir-verified?)
@@ -225,7 +221,7 @@
      :base-fee (:engagement/base-fee m) :monthly-rate (:engagement/monthly-rate m)
      :monitoring-months (:engagement/monitoring-months m) :claimed-fee (:engagement/claimed-fee m)
      :engages-local-staff-under-probation? (boolean (:engagement/engages-local-staff-under-probation? m))
-     :probation-employee-category (dec* (:engagement/probation-employee-category m))
+     :probation-employee-category (ls/dec* (:engagement/probation-employee-category m))
      :probation-period-months (:engagement/probation-period-months m)
      :requires-stir? (boolean (:engagement/requires-stir? m))
      :stir-verified? (boolean (:engagement/stir-verified? m))
@@ -242,21 +238,21 @@
          (map #(pull->engagement (d/pull (d/db conn) engagement-pull [:engagement/id %])))
          (sort-by :id)))
   (assessment-of [_ engagement-id]
-    (dec* (d/q '[:find ?p . :in $ ?eid
+    (ls/dec* (d/q '[:find ?p . :in $ ?eid
                 :where [?a :assessment/engagement-id ?eid] [?a :assessment/payload ?p]]
               (d/db conn) engagement-id)))
   (ledger [_]
     (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (draft-history [_]
     (->> (d/q '[:find ?s ?r :where [?e :draft-record/seq ?s] [?e :draft-record/record ?r]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (submit-history [_]
     (->> (d/q '[:find ?s ?r :where [?e :submit-record/seq ?s] [?e :submit-record/record ?r]] (d/db conn))
          (sort-by first)
-         (mapv (comp dec* second))))
+         (mapv (comp ls/dec* second))))
   (next-draft-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :draft-sequence/jurisdiction ?j] [?e :draft-sequence/next ?n]]
@@ -277,7 +273,7 @@
       (d/transact! conn [(engagement->tx value)])
 
       :assessment/set
-      (d/transact! conn [{:assessment/engagement-id (first path) :assessment/payload (enc payload)}])
+      (d/transact! conn [{:assessment/engagement-id (first path) :assessment/payload (ls/enc payload)}])
 
       :engagement/mark-drafted
       (let [engagement-id (first path)
@@ -287,7 +283,7 @@
         (d/transact! conn
                      [(engagement->tx (assoc engagement-patch :id engagement-id))
                       {:draft-sequence/jurisdiction jurisdiction :draft-sequence/next next-n}
-                      {:draft-record/seq (count (draft-history s)) :draft-record/record (enc (get result "record"))}])
+                      {:draft-record/seq (count (draft-history s)) :draft-record/record (ls/enc (get result "record"))}])
         result)
 
       :engagement/mark-submitted
@@ -298,12 +294,12 @@
         (d/transact! conn
                      [(engagement->tx (assoc engagement-patch :id engagement-id))
                       {:submit-sequence/jurisdiction jurisdiction :submit-sequence/next next-n}
-                      {:submit-record/seq (count (submit-history s)) :submit-record/record (enc (get result "record"))}])
+                      {:submit-record/seq (count (submit-history s)) :submit-record/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
+    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (ls/enc fact)}])
     fact)
   (with-engagements [s engagements]
     (when (seq engagements) (d/transact! conn (mapv engagement->tx (vals engagements)))) s))
