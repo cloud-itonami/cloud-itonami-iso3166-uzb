@@ -207,25 +207,7 @@
           :probation-ceiling-general-months 3
           :probation-ceiling-senior-months 6
           :probation-ceiling-senior-categories ["heads of organizations" "deputies of heads of organizations" "chief accountants" "heads of separate divisions of organizations"]
-          :probation-ceiling-provenance "https://lex.uz/en/docs/-6257288 (Labour Code of the Republic of Uzbekistan, Article 130, own text read in full)"}
-   "USA" {:name "United States"
-          :owner-authority "U.S. General Services Administration (GSA) / SAM.gov"
-          :legal-basis "Federal Acquisition Regulation (FAR); System for Award Management"
-          :national-spec "SAM.gov entity registration + NAICS self-certification"
-          :provenance "https://sam.gov/"
-          :required-evidence ["EIN record"
-                              "SAM.gov registration record"
-                              "State business registration record"
-                              "Authorized-representative record"]}
-   "DEU" {:name "Germany"
-          :owner-authority "Beschaffungsamt des BMI / e-Vergabe platforms"
-          :legal-basis "Gesetz gegen Wettbewerbsbeschränkungen (GWB) / VgV"
-          :national-spec "e-Vergabe supplier registration under EU procurement directives"
-          :provenance "https://www.evergabe-online.de/"
-          :required-evidence ["Handelsregister extract"
-                              "e-Vergabe registration record"
-                              "USt-IdNr record"
-                              "Authorized-representative record"]}})
+          :probation-ceiling-provenance "https://lex.uz/en/docs/-6257288 (Labour Code of the Republic of Uzbekistan, Article 130, own text read in full)"}})
 
 (defn spec-basis
   "The jurisdiction's requirement map, or nil -- nil means NO spec-basis,
