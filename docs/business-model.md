@@ -12,7 +12,7 @@ Uzbekistan.
   independently confirm or rule out a separate parliamentary "Law on
   Public Procurement" this session, nor a single named procurement
   regulator -- both honestly disclosed gaps (see
-  `src/marketentry/facts.cljc`).
+  `src/marketentry/facts.cljk`).
 - STIR (taxpayer identification number) tax registration is
   administered by the State Tax Committee of the Republic of Uzbekistan
   (`soliq.uz`) -- confirmed via that body's own live "Stiringizni

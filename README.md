@@ -55,7 +55,7 @@ iteration studied in depth):
   AJAX endpoint this iteration found and used directly, and an
   honestly-flagged, unresolved gap over which specific ministry/agency
   legally administers `birdarcha.uz`).
-- `src/statute/facts.cljc` -- general-law catalog: the Labour Code of
+- `src/statute/facts.cljk` -- general-law catalog: the Labour Code of
   the Republic of Uzbekistan (adopted 28 October 2022, own primary text
   read in full at `lex.uz/en/docs/-6257288`) and the Law "On investments
   and investment activity" No. LRU-598 (2019, per UNCTAD's Investment
@@ -87,7 +87,7 @@ Alongside the market-entry / statute catalogs, this repo carries a
 `com-junkawasaki/root`) — national dishes, protected products, beverages,
 crafts, festivals and heritage sites for Uzbekistan:
 
-- `src/culture/facts.cljc` — the catalog, source of truth (keyed by
+- `src/culture/facts.cljk` — the catalog, source of truth (keyed by
   uppercase ISO3, mirroring `statute.facts`).
 - `schema/culture.edn` — DataScript schema.
 - `data/culture-tx.edn` — derived DataScript tx-data (regenerated from
